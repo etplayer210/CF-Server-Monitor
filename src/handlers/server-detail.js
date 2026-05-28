@@ -1133,7 +1133,7 @@ export async function handleServerDetail(request, env, sys, viewId) {
     // =============================================
     async function loadAllHistory(hours) {
       try {
-        const res = await fetch(`/api/history/all?id=${serverId}&hours=${hours}`);
+        const res = await fetch(\`/api/history/all?id=\${serverId}&hours=\${hours}\`);
         if (!res.ok) return;
         const allData = await res.json();
         
