@@ -1,5 +1,22 @@
 let dbInitialized = false;
 
+const metricsHistoryCache = new Map();
+
+function getCacheKey(serverId, hours, columns) {
+  const sortedColumns = columns.split(',').sort().join(',');
+  return `${serverId}:${hours}:${sortedColumns}`;
+}
+
+function getCacheDuration(hours) {
+  if (hours >= 60) {
+    return 5 * 60 * 1000;
+  } else if (hours >= 30) {
+    return 3 * 60 * 1000;
+  } else {
+    return 1 * 60 * 1000;
+  }
+}
+
 export async function initDatabase(db) {
   if (dbInitialized) return;
   
@@ -77,6 +94,14 @@ export async function initDatabase(db) {
 
 export async function getMetricsHistory(db, serverId, hours, columns) {
   const now = Date.now();
+  const cacheKey = getCacheKey(serverId, hours, columns);
+  const cacheDuration = getCacheDuration(hours);
+  
+  const cached = metricsHistoryCache.get(cacheKey);
+  if (cached && now - cached.timestamp < cacheDuration) {
+    console.log(`[History] CACHE HIT: ${serverId}, hours: ${hours}`);
+    return cached.data;
+  }
   
   let queryHours = hours;
   let intervalMs;
@@ -134,6 +159,11 @@ export async function getMetricsHistory(db, serverId, hours, columns) {
   }));
 
   result.sort((a, b) => a.timestamp - b.timestamp);
+  
+  metricsHistoryCache.set(cacheKey, {
+    timestamp: now,
+    data: result
+  });
 
   console.log(`[History] FINAL: ${result.length}`);
 
