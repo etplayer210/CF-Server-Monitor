@@ -199,7 +199,7 @@ export async function handleAdminAPI(request, env, sys) {
       const settings = data.settings || {};
 
       const APPEARANCE_FIELDS = ['site_title', 'custom_bg', 'custom_head', 'custom_script'];
-      const SITE_FIELDS = ['is_public', 'show_price', 'show_expire', 'show_bw', 'show_tf', 'tg_notify', 'tg_bot_token', 'tg_chat_id', 'turnstile_enabled', 'turnstile_site_key', 'turnstile_secret_key', 'jwt_secret', 'username', 'password'];
+      const SITE_FIELDS = ['is_public', 'show_price', 'show_expire', 'show_bw', 'show_tf', 'tg_notify', 'tg_bot_token', 'tg_chat_id', 'turnstile_enabled', 'turnstile_site_key', 'turnstile_secret_key', 'jwt_secret', 'username', 'password', 'custom_ct', 'custom_cu', 'custom_cm', 'custom_bd'];
 
       const appearanceOptions = {};
       for (const field of APPEARANCE_FIELDS) {
@@ -231,6 +231,8 @@ export async function handleAdminAPI(request, env, sys) {
       await env.DB.prepare(
         'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value'
       ).bind('site_options', JSON.stringify(siteOptions)).run();
+
+      Object.assign(sys, appearanceOptions, siteOptions);
 
       if (settings && ('tg_notify' in settings || 'tg_bot_token' in settings || 'tg_chat_id' in settings)) {
         clearNotificationSettingsCache();

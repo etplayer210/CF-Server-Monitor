@@ -2504,6 +2504,42 @@ body::before {
     width: 35px;
 }
 
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.cmd-input-wrapper.copyable {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cmd-input-wrapper.copyable:hover {
+    border-color: var(--accent-cyan);
+}
+
+.cmd-input-wrapper.copyable .copy-hint {
+    margin-left: auto;
+    padding: 2px 8px;
+    background: var(--bg-hover);
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.cmd-input-wrapper.copyable:hover .copy-hint {
+    color: var(--accent-cyan);
+}
+
+.cmd-input-wrapper.copied .copy-hint {
+    color: var(--accent-green);
+}
+
 .checkbox-accent-green {
     accent-color: var(--accent-green);
 }

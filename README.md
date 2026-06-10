@@ -2,7 +2,7 @@
 
 一个基于 Cloudflare Workers + D1 的多服务器监控探针系统，支持实时监控、历史数据查看、延迟追踪、地图展示等功能。兼容主流Linux系统，Alpine Linux，Windows系统。**演示地址**：<https://tz.dashdeep.dpdns.org/>
 
-**当前版本：V2.6.2**
+**当前版本：V2.6.3**
 
 V2.6.0 降低了 **50%** 的D1写入消耗，强烈建议升级，升级后请在后台手动点击 **升级数据库** 或者 **重建数据库** 。
 
@@ -197,13 +197,13 @@ https://你的项目名.你的子域.workers.dev/admin
 Ubuntu / Debian / CentOS / RHEL / Fedora / Rocky / AlmaLinux 系统
 
 ```bash
-curl -sL https://你的项目.你的子域.workers.dev/install.sh | bash -s install <SERVER_ID> <SECRET> <WORKER_URL> [INTERVAL] [PING_TYPE]
+curl -sL https://你的项目.你的子域.workers.dev/install.sh | bash -s install -id=<SERVER_ID> -secret=<SECRET> -url=<WORKER_URL> [-interval=60] [-ping=http] [-ct=xxx] [-cu=xxx] [-cm=xxx] [-bd=xxx]
 ```
 
 Alpine 系统
 
 ```bash
-curl -sL https://你的项目.你的子域.workers.dev/install-alpine | sh -s install <SERVER_ID> <SECRET> <WORKER_URL> [INTERVAL] [PING_TYPE]
+curl -sL https://你的项目.你的子域.workers.dev/install-alpine.sh | sh -s install -id=<SERVER_ID> -secret=<SECRET> -url=<WORKER_URL> [-interval=60] [-ping=http] [-ct=xxx] [-cu=xxx] [-cm=xxx] [-bd=xxx]
 ```
 
 ### Windows 系统安装
@@ -226,11 +226,15 @@ curl -sL https://你的项目.你的子域.workers.dev/install-alpine | sh -s in
 
 | 参数           | 说明                      | 默认值    |
 | ------------ | ----------------------- | ------ |
-| `SERVER_ID`  | 服务器唯一标识符（必填）            | -      |
-| `SECRET`     | API 认证密钥（必填）            | -      |
-| `WORKER_URL` | Worker 上报地址（必填）         | -      |
-| `INTERVAL`   | 数据上报间隔（秒）               | `60`   |
-| `PING_TYPE`  | Ping 检测类型（`http`/`tcp`） | `http` |
+| `-id`        | 服务器唯一标识符（必填）            | -      |
+| `-secret`    | API 认证密钥（必填）            | -      |
+| `-url`       | Worker 上报地址（必填）         | -      |
+| `-interval`  | 数据上报间隔（秒）               | `60`   |
+| `-ping`      | Ping 检测类型（`http`/`tcp`） | `http` |
+| `-ct`        | 自定义CT测试节点              | 默认节点 |
+| `-cu`        | 自定义CU测试节点              | 默认节点 |
+| `-cm`        | 自定义CM测试节点              | 默认节点 |
+| `-bd`        | 自定义BD测试节点              | 默认节点 |
 
 > **注意**：上报间隔越短，数据越实时，但会增加 API 调用和数据库存储。建议根据服务器数量和网络状况选择合适的间隔。
 

@@ -10,12 +10,12 @@
         <form @submit.prevent="handleLogin">
           <div class="login-form-group">
             <label class="login-label">{{ trans.username }}</label>
-            <input type="text" v-model="loginForm.username" required class="login-input" placeholder="admin">
+            <input type="text" name="username" autocomplete="username" v-model="loginForm.username" required class="login-input" placeholder="admin">
           </div>
           <div class="login-form-group last">
             <label class="login-label">{{ trans.password }}</label>
             <div class="password-input-wrapper">
-              <input :type="passwordVisible.login ? 'text' : 'password'" v-model="loginForm.password" required class="login-input" placeholder="••••••••">
+              <input :type="passwordVisible.login ? 'text' : 'password'" name="password" autocomplete="current-password" v-model="loginForm.password" required class="login-input" placeholder="••••••••">
               <button type="button" class="password-toggle" @click="togglePassword('login')">
                 {{ passwordVisible.login ? '🙈' : '👁️' }}
               </button>
@@ -245,7 +245,7 @@
                 <div class="form-group">
                   <label class="form-label">{{ trans.telegramToken }}</label>
                   <div class="password-input-wrapper">
-                    <input :type="passwordVisible.tgBotToken ? 'text' : 'password'" v-model="settings.tg_bot_token" class="form-input" placeholder="Bot Token or Webhook URL">
+                    <input :type="passwordVisible.tgBotToken ? 'text' : 'password'" name="tg_bot_token" autocomplete="off" v-model="settings.tg_bot_token" class="form-input" placeholder="Bot Token or Webhook URL">
                     <button type="button" class="password-toggle" @click="togglePassword('tgBotToken')">
                       {{ passwordVisible.tgBotToken ? '🙈' : '👁️' }}
                     </button>
@@ -255,7 +255,7 @@
                 <div class="form-group">
                   <label class="form-label">{{ trans.chatId }}</label>
                   <div class="password-input-wrapper">
-                    <input :type="passwordVisible.tgChatId ? 'text' : 'password'" v-model="settings.tg_chat_id" class="form-input" placeholder="Telegram Chat ID (optional for WeChat)">
+                    <input :type="passwordVisible.tgChatId ? 'text' : 'password'" name="tg_chat_id" autocomplete="off" v-model="settings.tg_chat_id" class="form-input" placeholder="Telegram Chat ID (optional for WeChat)">
                     <button type="button" class="password-toggle" @click="togglePassword('tgChatId')">
                       {{ passwordVisible.tgChatId ? '🙈' : '👁️' }}
                     </button>
@@ -274,13 +274,13 @@
 
               <div class="form-group">
                 <label class="form-label">{{ trans.turnstileSiteKey }}</label>
-                <input type="text" v-model="settings.turnstile_site_key" class="form-input" :placeholder="trans.turnstileSiteKeyPlaceholder">
+                <input type="text" name="turnstile_site_key" autocomplete="off" v-model="settings.turnstile_site_key" class="form-input" :placeholder="trans.turnstileSiteKeyPlaceholder">
               </div>
 
               <div class="form-group">
                 <label class="form-label">{{ trans.turnstileSecretKey }}</label>
                 <div class="password-input-wrapper">
-                  <input :type="passwordVisible.turnstileSecret ? 'text' : 'password'" v-model="settings.turnstile_secret_key" class="form-input" :placeholder="trans.turnstileSecretKeyPlaceholder">
+                  <input :type="passwordVisible.turnstileSecret ? 'text' : 'password'" name="turnstile_secret_key" autocomplete="off" v-model="settings.turnstile_secret_key" class="form-input" :placeholder="trans.turnstileSecretKeyPlaceholder">
                   <button type="button" class="password-toggle" @click="togglePassword('turnstileSecret')">
                     {{ passwordVisible.turnstileSecret ? '🙈' : '👁️' }}
                   </button>
@@ -302,13 +302,13 @@
 
               <div class="form-group">
                 <label class="form-label">{{ trans.username }}</label>
-                <input type="text" v-model="settings.username" class="form-input" :placeholder="trans.usernamePlaceholder">
+                <input type="text" name="admin_username" autocomplete="username" v-model="settings.username" class="form-input" :placeholder="trans.usernamePlaceholder">
               </div>
 
               <div class="form-group">
                 <label class="form-label">{{ trans.password }}</label>
                 <div class="password-input-wrapper">
-                  <input :type="passwordVisible.password ? 'text' : 'password'" v-model="settings.password" class="form-input" placeholder="••••••••">
+                  <input :type="passwordVisible.password ? 'text' : 'password'" name="admin_password" autocomplete="new-password" v-model="settings.password" class="form-input" placeholder="••••••••">
                   <button type="button" class="password-toggle" @click="togglePassword('password')">
                     {{ passwordVisible.password ? '🙈' : '👁️' }}
                   </button>
@@ -318,7 +318,7 @@
               <div class="form-group">
                 <label class="form-label">{{ trans.confirmPassword }}</label>
                 <div class="password-input-wrapper">
-                  <input :type="passwordVisible.confirmPassword ? 'text' : 'password'" v-model="settings.confirm_password" class="form-input" placeholder="••••••••">
+                  <input :type="passwordVisible.confirmPassword ? 'text' : 'password'" name="admin_confirm_password" autocomplete="new-password" v-model="settings.confirm_password" class="form-input" placeholder="••••••••">
                   <button type="button" class="password-toggle" @click="togglePassword('confirmPassword')">
                     {{ passwordVisible.confirmPassword ? '🙈' : '👁️' }}
                   </button>
@@ -337,7 +337,7 @@
               <div class="form-group">
                 <label class="form-label">{{ trans.jwtSecret }}</label>
                 <div class="password-input-wrapper">
-                  <input :type="passwordVisible.jwtSecret ? 'text' : 'password'" v-model="settings.jwt_secret" class="form-input" :placeholder="trans.jwtSecretPlaceholder">
+                  <input :type="passwordVisible.jwtSecret ? 'text' : 'password'" name="jwt_secret" autocomplete="off" v-model="settings.jwt_secret" class="form-input" :placeholder="trans.jwtSecretPlaceholder">
                   <button type="button" class="password-toggle" @click="togglePassword('jwtSecret')">
                     {{ passwordVisible.jwtSecret ? '🙈' : '👁️' }}
                   </button>
@@ -348,6 +348,30 @@
                 <span class="warning-icon">[i]</span> 
                 {{ trans.jwtSecretTip }}
               </p>
+            </div>
+
+            <div class="settings-section">
+              <div class="section-title"><span>▸</span> {{ trans.pingNodes }}</div>
+              
+              <div class="form-group">
+                <label class="form-label">{{ trans.customCt }}</label>
+                <input type="text" v-model="settings.custom_ct" class="form-input" placeholder="gd-ct-dualstack.ip.zstaticcdn.com">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">{{ trans.customCu }}</label>
+                <input type="text" v-model="settings.custom_cu" class="form-input" placeholder="gd-cu-dualstack.ip.zstaticcdn.com">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">{{ trans.customCm }}</label>
+                <input type="text" v-model="settings.custom_cm" class="form-input" placeholder="gd-cm-dualstack.ip.zstaticcdn.com">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">{{ trans.customBd }}</label>
+                <input type="text" v-model="settings.custom_bd" class="form-input" placeholder="lf3-ips.zstaticcdn.com">
+              </div>
             </div>
           </div>
 
@@ -387,32 +411,32 @@
 
           <div class="form-group">
             <label class="form-label">{{ trans.hostnameLabel }} <span class="required">*</span></label>
-            <input type="text" v-model="editForm.name" class="form-input" placeholder="e.g. My Server">
+            <input type="text" name="edit_name" autocomplete="off" v-model="editForm.name" class="form-input" placeholder="e.g. My Server">
           </div>
 
           <div class="form-group">
             <label class="form-label">{{ trans.groupName }}</label>
-            <input type="text" v-model="editForm.server_group" class="form-input" placeholder="e.g. US VPS">
+            <input type="text" name="edit_server_group" autocomplete="off" v-model="editForm.server_group" class="form-input" placeholder="e.g. US VPS">
           </div>
 
           <div class="form-group">
             <label class="form-label">{{ trans.price }}</label>
-            <input type="text" v-model="editForm.price" class="form-input" placeholder="e.g. $40/year">
+            <input type="text" name="edit_price" autocomplete="off" v-model="editForm.price" class="form-input" placeholder="e.g. $40/year">
           </div>
 
           <div class="form-group">
             <label class="form-label">{{ trans.expirationDate }}</label>
-            <input type="date" v-model="editForm.expire_date" class="form-input">
+            <input type="date" name="edit_expire_date" autocomplete="off" v-model="editForm.expire_date" class="form-input">
           </div>
 
           <div class="form-group">
             <label class="form-label">{{ trans.bandwidth }}</label>
-            <input type="text" v-model="editForm.bandwidth" class="form-input" placeholder="e.g. 1Gbps">
+            <input type="text" name="edit_bandwidth" autocomplete="off" v-model="editForm.bandwidth" class="form-input" placeholder="e.g. 1Gbps">
           </div>
 
           <div class="form-group">
             <label class="form-label">{{ trans.trafficLimit }}</label>
-            <input type="text" v-model="editForm.traffic_limit" class="form-input" placeholder="e.g. 1TB/month">
+            <input type="text" name="edit_traffic_limit" autocomplete="off" v-model="editForm.traffic_limit" class="form-input" placeholder="e.g. 1TB/month">
           </div>
 
           <div class="form-group">
@@ -504,6 +528,28 @@
             <p class="text-muted text-sm mt-2">
               <span class="warning-icon">[i]</span> {{ trans.tcpWarning }}
             </p>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label class="form-label">{{ trans.customCt }}</label>
+              <input type="text" name="custom_ct" autocomplete="off" v-model="customCt" class="form-input" placeholder="gd-ct-dualstack.ip.zstaticcdn.com">
+            </div>
+            <div class="form-group flex-1">
+              <label class="form-label">{{ trans.customCu }}</label>
+              <input type="text" name="custom_cu" autocomplete="off" v-model="customCu" class="form-input" placeholder="gd-cu-dualstack.ip.zstaticcdn.com">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label class="form-label">{{ trans.customCm }}</label>
+              <input type="text" name="custom_cm" autocomplete="off" v-model="customCm" class="form-input" placeholder="gd-cm-dualstack.ip.zstaticcdn.com">
+            </div>
+            <div class="form-group flex-1">
+              <label class="form-label">{{ trans.customBd }}</label>
+              <input type="text" name="custom_bd" autocomplete="off" v-model="customBd" class="form-input" placeholder="lf3-ips.zstaticcdn.com">
+            </div>
           </div>
 
           <div class="form-group">
@@ -632,7 +678,11 @@ const settings = ref({
   jwt_secret: '',
   username: '',
   password: '',
-  confirm_password: ''
+  confirm_password: '',
+  custom_ct: '',
+  custom_cu: '',
+  custom_cm: '',
+  custom_bd: ''
 })
 const apiSecret = ref('')
 
@@ -680,6 +730,10 @@ const copyServerId = ref('')
 const targetOs = ref('linux')
 const reportInterval = ref(60)
 const pingMode = ref('http')
+const customCt = ref('')
+const customCu = ref('')
+const customCm = ref('')
+const customBd = ref('')
 const copiedCmd = ref(false)
 
 const handleLogin = async () => {
@@ -814,7 +868,11 @@ const loadSettings = async () => {
         turnstile_secret_key: settingsData.turnstile_secret_key || '',
         jwt_secret: settingsData.jwt_secret || '',
         username: settingsData.username || '',
-        password: ''  // 不显示加密后的密码
+        password: '',  // 不显示加密后的密码
+        custom_ct: settingsData.custom_ct || '',
+        custom_cu: settingsData.custom_cu || '',
+        custom_cm: settingsData.custom_cm || '',
+        custom_bd: settingsData.custom_bd || ''
       }
       apiSecret.value = data.api_secret || ''
     }
@@ -871,7 +929,11 @@ const saveSettings = async () => {
         turnstile_site_key: settings.value.turnstile_site_key,
         turnstile_secret_key: settings.value.turnstile_secret_key,
         jwt_secret: settings.value.jwt_secret,
-        username: settings.value.username
+        username: settings.value.username,
+        custom_ct: settings.value.custom_ct,
+        custom_cu: settings.value.custom_cu,
+        custom_cm: settings.value.custom_cm,
+        custom_bd: settings.value.custom_bd
       }
     }
 
@@ -932,7 +994,7 @@ const addServer = async () => {
 
 const getInstallCommand = (serverId) => {
   const HOST = API_BASE
-  return `curl -sL ${HOST}/install.sh | bash -s install ${serverId} '${apiSecret.value}' ${HOST}/update 60 http`
+  return `curl -sL ${HOST}/install.sh | bash -s install -id=${serverId} -secret='${apiSecret.value}' -url=${HOST}/update`
 }
 
 const getUninstallCommand = () => {
@@ -944,6 +1006,10 @@ const copyCmd = (serverId) => {
   targetOs.value = 'linux'
   reportInterval.value = 60
   pingMode.value = 'http'
+  customCt.value = settings.value.custom_ct
+  customCu.value = settings.value.custom_cu
+  customCm.value = settings.value.custom_cm
+  customBd.value = settings.value.custom_bd
   copiedCmd.value = false
   showCopyModal.value = true
 }
@@ -955,7 +1021,12 @@ const getCustomInstallCommand = () => {
   }
   const shell = targetOs.value === 'alpine' ? 'sh' : 'bash'
   const script = targetOs.value === 'alpine' ? 'install-alpine.sh' : 'install.sh'
-  return `curl -sL ${HOST}/${script} | ${shell} -s install ${copyServerId.value} '${apiSecret.value}' ${HOST}/update ${reportInterval.value} ${pingMode.value}`
+  let cmd = `curl -sL ${HOST}/${script} | ${shell} -s install -id=${copyServerId.value} -secret='${apiSecret.value}' -url=${HOST}/update -interval=${reportInterval.value} -ping=${pingMode.value}`
+  if (customCt.value) cmd += ` -ct=${customCt.value}`
+  if (customCu.value) cmd += ` -cu=${customCu.value}`
+  if (customCm.value) cmd += ` -cm=${customCm.value}`
+  if (customBd.value) cmd += ` -bd=${customBd.value}`
+  return cmd
 }
 
 const copyCustomCmd = async () => {

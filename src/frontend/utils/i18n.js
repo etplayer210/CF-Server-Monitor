@@ -175,6 +175,11 @@ const translations = reactive({
     tcpWarning: 'If TCP mode is not compatible, please switch to HTTP mode',
     copied: 'Copied!',
     close: 'Close',
+    pingNodes: 'Ping Nodes',
+    customCt: 'China Telecom Node',
+    customCu: 'China Union Telecom Node',
+    customCm: 'China Mobile Telecom Node',
+    customBd: 'BD Node',
     jwtSecretTip: 'JWT secret is used to generate and verify login tokens. Use a random string of at least 32 characters.',
     jwtSecretMinLength: 'JWT Secret must be at least 32 characters long',
     jwtSecretNoWhitespace: 'JWT Secret should not contain whitespace',
@@ -370,6 +375,11 @@ const translations = reactive({
     tcpWarning: '如果TCP模式不兼容，请切换到HTTP模式',
     copied: '已复制！',
     close: '关闭',
+    pingNodes: 'Ping节点',
+    customCt: '中国电信测试节点',
+    customCu: '中国联通测试节点',
+    customCm: '中国移动测试节点',
+    customBd: 'BD测试节点',
     jwtSecretTip: 'JWT密钥用于生成和验证登录token。使用至少32个字符的随机字符串。',
     jwtSecretMinLength: 'JWT Secret至少需要32个字符',
     jwtSecretNoWhitespace: 'JWT Secret不应包含空格',
@@ -393,7 +403,7 @@ const translations = reactive({
   }
 })
 
-const currentLang = ref(localStorage.getItem('language_preference') || 'en')
+const currentLang = ref(localStorage.getItem('language_preference') || 'zh')
 
 export const t = (key) => {
   return translations[currentLang.value]?.[key] || translations.en[key] || key

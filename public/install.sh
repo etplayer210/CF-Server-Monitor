@@ -94,6 +94,10 @@ stop_old_service() {
 create_script() {
     local report_interval=${1:-60}
     local ping_type=${2:-http}
+    local ct_node=${3:-}
+    local cu_node=${4:-}
+    local cm_node=${5:-}
+    local bd_node=${6:-}
     step "注入工业级监控采集探针..."
 
     cat > "${SCRIPT_FILE}" << 'PROBE_EOF'
@@ -106,6 +110,10 @@ SECRET="${2:-}"
 WORKER_URL="${3:-}"
 REPORT_INTERVAL="${4:-60}"
 PING_TYPE="${5:-PING_TYPE_PLACEHOLDER}"
+CT_NODE="${6:-}"
+CU_NODE="${7:-}"
+CM_NODE="${8:-}"
+BD_NODE="${9:-}"
 
 # 严苛环境下的规范 JSON 字段转义函数
 escape_json() {
@@ -188,11 +196,11 @@ get_ping() {
     fi
 }
 
-# 静态测试节点定义
-CT_NODE="gd-ct-dualstack.ip.zstaticcdn.com"
-CU_NODE="gd-cu-dualstack.ip.zstaticcdn.com"
-CM_NODE="gd-cm-dualstack.ip.zstaticcdn.com"
-BD_NODE="lf3-ips.zstaticcdn.com"
+# 测试节点定义（支持参数覆盖，空值则跳过）
+CT_NODE="${CT_NODE:-}"
+CU_NODE="${CU_NODE:-}"
+CM_NODE="${CM_NODE:-}"
+BD_NODE="${BD_NODE:-}"
 
 # ==============================================================================
 # 高并发/无竞态后台网络 Worker 协程
@@ -215,10 +223,10 @@ run_network_worker() {
         
         # 30秒检测一次网络延迟
         if [ $((now - last_ping)) -ge 30 ] || [ "$last_ping" -eq 0 ]; then
-            get_ping "$CT_NODE" > /dev/shm/.cf_ping_ct.tmp && mv /dev/shm/.cf_ping_ct.tmp /dev/shm/.cf_ping_ct || true
-            get_ping "$CU_NODE" > /dev/shm/.cf_ping_cu.tmp && mv /dev/shm/.cf_ping_cu.tmp /dev/shm/.cf_ping_cu || true
-            get_ping "$CM_NODE" > /dev/shm/.cf_ping_cm.tmp && mv /dev/shm/.cf_ping_cm.tmp /dev/shm/.cf_ping_cm || true
-            get_ping "$BD_NODE" > /dev/shm/.cf_ping_bd.tmp && mv /dev/shm/.cf_ping_bd.tmp /dev/shm/.cf_ping_bd || true
+            [ -n "$CT_NODE" ] && get_ping "$CT_NODE" > /dev/shm/.cf_ping_ct.tmp && mv /dev/shm/.cf_ping_ct.tmp /dev/shm/.cf_ping_ct || rm -f /dev/shm/.cf_ping_ct
+            [ -n "$CU_NODE" ] && get_ping "$CU_NODE" > /dev/shm/.cf_ping_cu.tmp && mv /dev/shm/.cf_ping_cu.tmp /dev/shm/.cf_ping_cu || rm -f /dev/shm/.cf_ping_cu
+            [ -n "$CM_NODE" ] && get_ping "$CM_NODE" > /dev/shm/.cf_ping_cm.tmp && mv /dev/shm/.cf_ping_cm.tmp /dev/shm/.cf_ping_cm || rm -f /dev/shm/.cf_ping_cm
+            [ -n "$BD_NODE" ] && get_ping "$BD_NODE" > /dev/shm/.cf_ping_bd.tmp && mv /dev/shm/.cf_ping_bd.tmp /dev/shm/.cf_ping_bd || rm -f /dev/shm/.cf_ping_bd
             last_ping="$now"
         fi
         sleep 5
@@ -368,18 +376,32 @@ done
 PROBE_EOF
 
     sed -i "s/PING_TYPE_PLACEHOLDER/${ping_type}/g" "${SCRIPT_FILE}"
+    
+    [ -n "${ct_node}" ] && sed -i "s|CT_NODE=\".*\"|CT_NODE=\"${ct_node}\"|g" "${SCRIPT_FILE}"
+    [ -n "${cu_node}" ] && sed -i "s|CU_NODE=\".*\"|CU_NODE=\"${cu_node}\"|g" "${SCRIPT_FILE}"
+    [ -n "${cm_node}" ] && sed -i "s|CM_NODE=\".*\"|CM_NODE=\"${cm_node}\"|g" "${SCRIPT_FILE}"
+    [ -n "${bd_node}" ] && sed -i "s|BD_NODE=\".*\"|BD_NODE=\"${bd_node}\"|g" "${SCRIPT_FILE}"
 
     chmod +x "${SCRIPT_FILE}"
     info "探针脚本注入完成: ${SCRIPT_FILE}"
 }
 
 create_service() {
+    local ct_node="${1:-}"
+    local cu_node="${2:-}"
+    local cm_node="${3:-}"
+    local bd_node="${4:-}"
+    
     step "构建高兼容、全版本通用的 Systemd 守护配置..."
     
     local esc_id; esc_id=$(printf '%s' "$SERVER_ID" | sed 's/\\/\\\\/g; s/"/\\"/g')
     local esc_sec; esc_sec=$(printf '%s' "$SECRET" | sed 's/\\/\\\\/g; s/"/\\"/g; s/%/%%/g')
     local esc_url; esc_url=$(printf '%s' "$WORKER_URL" | sed 's/\\/\\\\/g; s/"/\\"/g')
     local esc_ping; esc_ping=$(printf '%s' "$PING_TYPE" | sed 's/\\/\\\\/g; s/"/\\"/g')
+    local esc_ct; esc_ct=$(printf '%s' "$ct_node" | sed 's/\\/\\\\/g; s/"/\\"/g')
+    local esc_cu; esc_cu=$(printf '%s' "$cu_node" | sed 's/\\/\\\\/g; s/"/\\"/g')
+    local esc_cm; esc_cm=$(printf '%s' "$cm_node" | sed 's/\\/\\\\/g; s/"/\\"/g')
+    local esc_bd; esc_bd=$(printf '%s' "$bd_node" | sed 's/\\/\\\\/g; s/"/\\"/g')
     
     # 完全剔除 MemoryHigh/MemoryMax/CPUQuota 等低版本 Systemd 会抛错的非泛用特性
     # 仅使用全版本 Linux 完美兼容的 Nice 权重调配及 IO 闲置调度
@@ -391,7 +413,7 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart=/bin/bash "${SCRIPT_FILE}" "${esc_id}" "${esc_sec}" "${esc_url}" "${REPORT_INTERVAL}" "${esc_ping}"
+ExecStart=/bin/bash "${SCRIPT_FILE}" "${esc_id}" "${esc_sec}" "${esc_url}" "${REPORT_INTERVAL}" "${esc_ping}" "${esc_ct}" "${esc_cu}" "${esc_cm}" "${esc_bd}"
 Restart=always
 RestartSec=5
 User=root
@@ -428,17 +450,52 @@ start_service() {
 }
 
 install_probe() {
-    SERVER_ID=${1:-""}
-    SECRET=${2:-""}
-    WORKER_URL=${3:-""}
-    REPORT_INTERVAL=${4:-}
-    PING_TYPE=${5:-}
+    SERVER_ID=""
+    SECRET=""
+    WORKER_URL=""
+    REPORT_INTERVAL=""
+    PING_TYPE=""
+    CT_NODE=""
+    CU_NODE=""
+    CM_NODE=""
+    BD_NODE=""
+
+    for arg in "$@"; do
+        case "$arg" in
+            -id=*) SERVER_ID="${arg#-id=}" ;;
+            -secret=*) SECRET="${arg#-secret=}" ;;
+            -url=*) WORKER_URL="${arg#-url=}" ;;
+            -interval=*) REPORT_INTERVAL="${arg#-interval=}" ;;
+            -ping=*) PING_TYPE="${arg#-ping=}" ;;
+            -ct=*) CT_NODE="${arg#-ct=}" ;;
+            -cu=*) CU_NODE="${arg#-cu=}" ;;
+            -cm=*) CM_NODE="${arg#-cm=}" ;;
+            -bd=*) BD_NODE="${arg#-bd=}" ;;
+        esac
+    done
 
     if [ -z "$SERVER_ID" ] || [ -z "$SECRET" ] || [ -z "$WORKER_URL" ]; then
         echo -e "${RED}错误: 运行所需的入参不完整。${NC}\n"
         echo "用法:"
-        echo "  bash $0 install <SERVER_ID> <SECRET> <WORKER_URL> [REPORT_INTERVAL] [PING_TYPE]"
-        echo "  PING_TYPE: http (默认) | tcp"
+        echo "  bash $0 install -id=SERVER_ID -secret=SECRET -url=WORKER_URL [选项]"
+        echo ""
+        echo "必需参数:"
+        echo "  -id=xxx        服务器ID"
+        echo "  -secret=xxx    密钥"
+        echo "  -url=xxx       上报地址"
+        echo ""
+        echo "可选参数:"
+        echo "  -interval=N    上报间隔(秒)，默认60"
+        echo "  -ping=TYPE     探测类型: http | tcp，默认http"
+        echo "  -ct=HOST       自定义CT测试节点"
+        echo "  -cu=HOST       自定义CU测试节点"
+        echo "  -cm=HOST       自定义CM测试节点"
+        echo "  -bd=HOST       自定义BD测试节点"
+        echo ""
+        echo "示例:"
+        echo "  bash $0 install -id=server123 -secret=abc123 -url=https://worker.example.com"
+        echo "  bash $0 install -id=server123 -secret=abc123 -url=https://worker.example.com -interval=30 -ping=tcp"
+        echo "  bash $0 install -id=server123 -secret=abc123 -url=https://worker.example.com -ct=ct.example.com -cu=cu.example.com"
         exit 1
     fi
 
@@ -450,14 +507,24 @@ install_probe() {
     detect_os
     install_deps
     stop_old_service
-    create_script "$REPORT_INTERVAL" "$PING_TYPE"
-    create_service
+    create_script "$REPORT_INTERVAL" "$PING_TYPE" "$CT_NODE" "$CU_NODE" "$CM_NODE" "$BD_NODE"
+    create_service "$CT_NODE" "$CU_NODE" "$CM_NODE" "$BD_NODE"
     start_service
 
     echo -e "\n${GREEN}============================================="
     echo -e "         CF-Server-Monitor 安装成功"
     echo -e "=============================================${NC}"
     echo -e "  服务状态 : ${GREEN}Active (Running)${NC}"
+    echo -e "  配置参数 :"
+    echo -e "    ● Server ID   : ${SERVER_ID}"
+    echo -e "    ● Secret      : ${SECRET}"
+    echo -e "    ● Worker URL  : ${WORKER_URL}"
+    echo -e "    ● 上报间隔    : ${REPORT_INTERVAL}秒"
+    echo -e "    ● 探测类型    : ${PING_TYPE}"
+    [ -n "${CT_NODE}" ] && echo -e "    ● CT节点      : ${CT_NODE}"
+    [ -n "${CU_NODE}" ] && echo -e "    ● CU节点      : ${CU_NODE}"
+    [ -n "${CM_NODE}" ] && echo -e "    ● CM节点      : ${CM_NODE}"
+    [ -n "${BD_NODE}" ] && echo -e "    ● BD节点      : ${BD_NODE}"
     echo -e "  管理指令 :"
     echo -e "    ● 查看实时日志 : journalctl -u ${SERVICE_NAME} -f"
     echo -e "    ● 查看运行状态 : systemctl status ${SERVICE_NAME}"
