@@ -154,7 +154,7 @@ install_deps() {
     # 检查 tcping（可选，用于更准确的丢包率测量）
     if ! command -v tcping >/dev/null 2>&1; then
         warn "未检测到 tcping 命令，丢包率将使用 nc 测量（如不可用则返回空值）"
-        warn "如需更准确的 TCP 层丢包率测量，请手动安装 tcping"
+        warn "如需更准确的 TCP 层丢包率测量，请手动安装 tcping，见README.md"
     else
         info "tcping 已安装，将使用 tcping 测量丢包率"
     fi
